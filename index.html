@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+	<title>SVG Editor</title>
+	<head>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				color: #888;
+				background: #eee;
+				font-family: sans-serif;
+				font-size: 13px;
+			}
+			button {
+				width: 100%;
+				color: #888;
+				background-color: transparent;
+				border: 1px solid #ccc;
+				padding: 4px 8px;
+				text-transform: uppercase;
+				cursor: pointer;
+				outline: none;
+			}
+			button:hover {
+				color: #fff;
+				border: transparent;
+				background-color: #999;
+			}
+			input {
+				color: #888;
+				padding: 4px 8px;
+			}
+			hr {
+				border: 0;
+				padding: 2px 0px;
+			}
+			#tools {
+				padding: 0px 10px;
+				display: inline-block;
+				width: 110px;
+				line-height: 24px;
+				vertical-align: top;
+			}
+			#content {
+				display: inline-block;
+				width: 600px;
+			}
+				#stage {
+					background: #fff;
+				}
+				#stage.wireframe * {
+					stroke: #000 !important;
+					stroke-width: 1px !important;
+					fill: transparent !important;
+				}
+		</style>
+	</head>
+	<body>
+		<div id="mypanel">
+			<select class="form-control" name="shapes" id="shapes">
+				<option value="basic">Alapformák</option>
+			</select>
+			<div class="addable-svgs">
+				<svg width="100" height="100" style="fill: lightgrey; margin-top: 10px; margin-right: 5px;">
+					<circle r="50" cx="50" cy="50"></circle>
+					<circle r="5" cx="150" cy="150"></circle>
+				</svg>
+				<svg width="100" height="100" style="fill: lightgrey; margin-top: 10px; margin-right: 5px;">
+					<circle r="50" cx="50" cy="50"></circle>
+				</svg>
+				<svg width="100" height="100" style="fill: lightgrey; margin-top: 10px; margin-right: 5px;">
+					<circle r="50" cx="50" cy="50"></circle>
+				</svg>
+				<svg width="100" height="100" style="fill: lightgrey; margin-top: 10px; margin-right: 5px;">
+					<circle r="50" cx="50" cy="50"></circle>
+				</svg>
+			</div>
+		</div>
+		<div class="wrapper" id="slidein-wrapper" style="position: absolute; left: 360px; width: 100%;">
+			<nav class="navbar navbar-expand-lg navbar-light bg-white">
+				<div class="pickable-colors">
+					<svg width="45" height="30" style="fill: magenta; margin-right: 5px;">
+						<rect width="80" height="40"></rect>
+					</svg>
+					<svg width="45" height="30" style="fill: red; margin-right: 5px;">
+						<rect width="80" height="40"></rect>
+					</svg>
+					<svg width="45" height="30" style="fill: green; margin-right: 5px;">
+						<rect width="80" height="40"></rect>
+					</svg>
+					<svg width="45" height="30" style="fill: orange; margin-right: 5px;">
+						<rect width="80" height="40"></rect>
+					</svg>
+					<svg width="45" height="30" style="fill: blue; margin-right: 5px;">
+						<rect width="80" height="40"></rect>
+					</svg>
+				</div>
+			</nav>
+			<span id="tools" style="margin-top: 20px; margin-left: 35px;">
+				<input id="title" value="Untitled" style="width:100%"></input>
+				<hr/>
+				<button id="load">Load</button>
+				<button id="save">Save</button>
+				<button id="clear">Clear</button>
+				<hr/>
+				<button id="undo">Undo</button>
+				<button id="redo">Redo</button>
+				<hr/>
+				<button id="move">Move</button>
+				<button id="paint">Paint</button>
+			</span>
+			<span id="content" style="background-color: white; margin-top: 20px;">
+				<svg id="stage" width="600" height="400" viewBox="0 0 600 400"></svg>
+				<input id="textarea" type="hidden"></input>
+				<canvas id="canv" style="display: none;" width="600" height="400"></canvas>
+			</span>
+		</div>
+
+		<link rel="stylesheet" type="text/css" href="css/jquery.slidein.css">
+
+	    <script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
+	    <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+	    <script type="text/javascript" src="js/d3.js"></script>
+	    <script type="text/javascript" src="js/d3-drag.v1.min.js"></script>
+	    <script type="text/javascript" src="js/jquery.svgedit.js"></script>
+	    <script type="text/javascript" src="js/jquery.slidein.js"></script>
+	    <script type="text/javascript" src="js/canvg.js"></script>
+		<script>
+
+            $("#mypanel").slidein ({ peek: 0, speed: 500, position: 50, breadth: 370 });
+
+			const NS = 'http://www.w3.org/2000/svg';
+
+			const WIDTH = 600;
+			const HEIGHT = 400;
+
+			function parseNumber( value ) {
+
+				return parseFloat( value.toFixed( 2 ) );
+
+			}
+
+			function randomColor() {
+
+				return '#'+Math.floor(Math.random()*16777215).toString(16);
+
+			}
+
+			$(document).ready (function ()
+			{
+				$('#stage').svgedit();
+			});
+
+			//createCircle.addEventListener( 'click', function () {
+
+			//	var element = document.createElementNS( NS, 'circle' );
+			//	element.setAttribute( 'cx', parseNumber( Math.random() * WIDTH ) );
+			//	element.setAttribute( 'cy', parseNumber( Math.random() * HEIGHT ) );
+			//	element.setAttribute( 'r', parseNumber( Math.random() * 100 ) );
+			//	element.style.stroke = 'black';
+			//	element.style.fill = randomColor();
+
+			//	$('#stage').svgedit('addElement', element);
+
+			//} );
+
+			$('.addable-svgs svg').click(function(event) {
+				$('#stage').svgedit('addElement', event.target);
+			});
+
+			$('.pickable-colors svg').click(function(event) {
+				$('#stage').svgedit('changeColor', $(event.target).parent("svg")[0].style.fill);
+			});
+
+			// LOAD
+			// TODO: move to function
+
+			var form = document.createElement( 'form' );
+			form.style.display = 'none';
+			document.body.appendChild( form );
+
+			var input = document.createElement( 'input' );
+			input.type = 'file';
+			input.addEventListener( 'change', function ( event ) {
+
+				var file = input.files[ 0 ];
+
+				title.value = file.name.split( '.' )[ 0 ];
+
+				var reader = new FileReader();
+				reader.addEventListener( 'load', function ( event ) {
+
+					var contents = event.target.result;
+					$('#stage').svgedit('setContent', new DOMParser().parseFromString( contents, 'image/svg+xml' ) );
+
+				}, false );
+				reader.readAsText( file );
+
+				form.reset();
+
+			} );
+			form.appendChild( input );
+
+			load.addEventListener( 'click', function () {
+
+				input.click();
+
+			} );
+
+			// SAVE
+
+			save.addEventListener( 'click', function () {
+				$('#stage').svgedit('save');
+			} );
+
+			// CLEAR
+
+			clear.addEventListener( 'click', function () {
+
+				$('#stage').svgedit('clear');
+
+			} );
+
+			// UNDO
+			undo.addEventListener('click', function() {
+				$('#stage').svgedit('undo');
+			});
+			// REDO
+			redo.addEventListener('click', function() {
+				$('#stage').svgedit('redo');
+			});
+			
+			// MOVE
+			move.addEventListener('click', function() {
+				$('#stage').svgedit('changeTool', 'move');
+			});
+
+			// PAINT
+			paint.addEventListener('click', function() {
+				$('#stage').svgedit('changeTool', 'paint');
+			});
+
+		</script>
+
+	</body>
+</html>
